@@ -1,0 +1,93 @@
+version: "3"
+name: adener
+
+x-defaults: &defaults
+  volumes:
+    - type: bind
+      source: /raid
+      target: /raid
+    - type: bind
+      source: ${SSH_AUTH_SOCK}
+      target: /ssh-agent
+    - type: bind
+      source: ${DEVROOT}
+      target: /devroot
+    - type: bind
+      source: ${HOME}/.bashrc
+      target: ${HOME}/.bashrc
+    - type: bind
+      source: ${HOME}/.inputrc
+      target: ${HOME}/.inputrc
+    - type: bind
+      source: ${HOME}/.gitconfig
+      target: ${HOME}/.gitconfig
+    - type: bind
+      source: ${HOME}/.shellcheckrc
+      target: ${HOME}/.shellcheckrc
+    - type: bind
+      source: ${HOME}/.config
+      target: ${HOME}/.config
+    - type: bind
+      source: ${HOME}/.vscode-server
+      target: ${HOME}/.vscode-server
+    - type: bind
+      source: ${HOME}/.local/bin/starship
+      target: /usr/bin/starship
+  environment:
+    - SSH_AUTH_SOCK=/ssh-agent
+  user: 100341:30
+  init: true
+  network_mode: host
+  ipc: host
+  stdin_open: true
+  tty: true
+  command: /bin/bash
+  privileged: true
+  ulimits: &ulimits
+    memlock: -1
+    stack: 67108864
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+
+services:
+
+  te-jax-dev:
+    <<: *defaults
+    container_name: te-jax-dev
+    build:
+      context: .
+      cache_from:
+        - ghcr.io/nvidia/pax:latest
+      args:
+        base: ghcr.io/nvidia/pax:latest
+        pydeps: git+https://github.com/deepmind/einshape
+    working_dir: /workspace/te-jax-dev
+
+  te-torch-dev:
+    <<: *defaults
+    container_name: te-torch-dev
+    build:
+      context: .
+      cache_from:
+        - gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
+      args:
+        base: gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
+        pydeps:
+    working_dir: /workspace/te-torch-dev
+
+  te-all-dev:
+    <<: *defaults
+    container_name: te-all-dev
+    build:
+      context: .
+      cache_from:
+        - gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
+      args:
+        base: gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
+        pydeps: jax[cuda12_local],git+https://github.com/google/flax,git+https://github.com/google/praxis,git+https://github.com/deepmind/einshape
+    working_dir: /workspace

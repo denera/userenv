@@ -1,0 +1,7 @@
+# ~/.inputrc
+
+# partial history search with up/down arrows
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+"\e[C": forward-char
+"\e[D": backward-char

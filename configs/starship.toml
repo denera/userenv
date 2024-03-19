@@ -1,0 +1,60 @@
+format="$all"
+
+[battery]
+full_symbol = '🔋 '
+charging_symbol = '⚡️ '
+discharging_symbol = '💀 '
+
+[c]
+format = 'via [$name $version]($style)'
+
+[container]
+format = '[$symbol \[$name\]]($style) '
+
+[directory]
+format = 'in [$path]($style)[$read_only]($read_only_style) '
+style = 'cyan bold'
+truncation_length = 8
+truncation_symbol = '…/'
+
+[docker_context]
+format = 'via [🐋 $context](blue bold)'
+
+[git_metrics]
+added_style = 'bold blue'
+format = '[+$added]($added_style)/[-$deleted]($deleted_style) '
+
+[hostname]
+ssh_only = false
+format = '@ [$hostname](bold red) [$ssh_symbol](bold blue)'
+trim_at = '.nvidia.com'
+disabled = false
+
+[shell]
+bash_indicator = '󱆃'
+zsh_indicator = "󱉸"
+fish_indicator = '󰈺'
+powershell_indicator = ''
+unknown_indicator = ''
+style = 'cyan bold'
+disabled = false
+
+[sudo]
+format = '[as root $symbol]($style)'
+style = 'bold green'
+symbol = ' '
+disabled = false
+
+[time]
+disabled = false
+format = '🕙[\[ $time \]]($style) '
+time_format = '%T'
+utc_time_offset = '-5'
+time_range = '10:00:00-14:00:00'
+
+[username]
+style_user = 'white bold'
+style_root = 'black bold'
+format = '[$user]($style) '
+disabled = false
+show_always = true
