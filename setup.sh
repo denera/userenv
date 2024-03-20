@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-IFS='' read -r -d '' usage <<EOT
+IFS='' read -r -d '' USAGE <<EOT
 Usage: bash setup.sh [OPTION]
 
 Can be remotely invoked with:
@@ -16,7 +16,6 @@ Options:
 EOT
 
 # helper functions
-
 env_backup() {
     if [ -L $1 ]; then
         echo "    Removing sym-link: ~/$1 -> $(readlink -f "${HOME}/$1")";
@@ -27,40 +26,49 @@ env_backup() {
         mv "${HOME}/$1" "${HOME}/env_backup/$1";
     fi;
 }
+
 git_origin() {
-    cd $1 2>/dev/null || return 1;
-    local origin=$(git remote get-url origin);
-    cd - 2>/dev/null || return 1;
-    echo "${origin}";
+    (cd "$1" > /dev/null 2>&1 && git remote get-url origin && cd - > /dev/null 2>&1) || return 1;
 }
 
 # parse options
-STAGE=${HOME}/.config/${USER};
-DEVROOT=${HOME}/devroot;
+STAGE="${HOME}/.config/${USER}";
+DEVROOT="${HOME}/devroot";
 CMD='ln -s'
 OVERWRITE=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
-            echo $usage;
+            echo "${USAGE}";
             exit 0;
             ;;
-        -s|--stage)
-            shift; STAGE=$1 shift;
+        -s|--stage*)
+            if [[ "$1" == *"="* ]]; then
+                STAGE=$(cut -d'=' -f2 <<< "$1");
+            else
+                shift; STAGE="$1";
+            fi;
+            shift;
             ;;
         -c|--copy)
-            CMD='cp -R' shift;
+            CMD='cp -R';
+            shift;
             ;;
         -o|--overwrite)
-            OVERWRITE=true; shift;
+            OVERWRITE=true;
+            shift;
             ;;
-        -d|--devroot)
-            shift; DEVROOT=$1; shift;
+        -d|--devroot*)
+            if [[ "$1" == *"="* ]]; then
+                DEVROOT=$(cut -d'=' -f2 <<< "$1");
+            else
+                shift; DEVROOT="$1";
+            fi;
             shift;
             ;;
         *)
             echo "ERROR: Unrecognized argument: $1";
-            echo $usage;
+            echo "${USAGE}";
             exit 1;
             ;;
     esac;
@@ -75,8 +83,8 @@ if [[ "${DEVROOT}" != "${HOME}/devroot" ]]; then
 fi;
 
 # clone user environment config
+echo "Staging github.com/denera/userenv in ${STAGE} ...";
 if [ ! -d "${STAGE}" ]; then
-    echo "Pulling userenv repo to ${STAGE} ...";
     git clone https://github.com/denera/userenv.git "${STAGE}";
 elif [[ $(git_origin "${STAGE}") != "git@github.com:denera/userenv.git" ]]; then
     echo "    ERROR: Invalid staging path: ${STAGE}";
