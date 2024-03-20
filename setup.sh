@@ -106,8 +106,8 @@ mkdir -p "${HOME}/.config";
 shopt -s dotglob
 for item in "${STAGE}/configs/"*; do
     config=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/${config}" ] && env_backup "${config}";
-    [ ! -e "${HOME}/${config}" ] && eval "${CMD} ${STAGE}/configs/${config} ${HOME}/${config}";
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/${config}" ] && env_backup "${config}";
+    [ ! -e "${HOME}/.config/${config}" ] && eval "${CMD} ${STAGE}/configs/${config} ${HOME}/.config/${config}";
 done;
 
 # link binaries
@@ -116,8 +116,8 @@ mkdir -p "${HOME}/.local/bin";
 shopt -s dotglob
 for item in "${STAGE}/bins/"*; do
     bin=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/${bin}" ] && env_backup "${bin}";
-    [ ! -e "${HOME}/${bin}" ] && eval "${CMD} ${STAGE}/bins/${bin} ${HOME}/${bin}";
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.local/bin/${bin}" ] && env_backup "${bin}";
+    [ ! -e "${HOME}/.local/bin/${bin}" ] && eval "${CMD} ${STAGE}/bins/${bin} ${HOME}/.local/bin/${bin}";
 done
 
 echo "DONE -- reload your bash environment with 'exec /bin/bash'"
