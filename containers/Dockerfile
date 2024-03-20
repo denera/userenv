@@ -21,7 +21,6 @@ apt-get install -y sudo \
                    bear
 EOT
 
-
 # clone GDRcopy for IDE symbol search
 RUN git clone https://github.com/NVIDIA/gdrcopy.git /opt/gdrcopy
 
@@ -40,12 +39,12 @@ done
 EOT
 
 # create container user that mirrors the host user
-ENV HOST_GROUP=dip
-ENV HOST_GID=30
 ENV HOST_USER=adener
 ENV HOST_UID=100341
+ENV HOST_GROUP=dip
+ENV HOST_GID=30
 RUN useradd -o -m -N -u $HOST_UID -g $HOST_GID -s /bin/bash $HOST_USER
-RUN usermod -aG dip $HOST_USER
+RUN usermod -aG $HOST_GROUP $HOST_USER;
 RUN usermod -aG sudo $HOST_USER
 RUN usermod -aG root $HOST_USER
 

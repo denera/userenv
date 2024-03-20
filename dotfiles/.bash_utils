@@ -105,7 +105,7 @@ Always-on Docker Options:
   # parse docker compose arguments
   local DETACH=""
   local CONTAINER="${*: -1}"
-  local COMPOSE_FILE="${HOME}/.config/${USER}/containers/docker-compose.yaml"
+  local COMPOSE_FILE="${HOME}/.config/docker/docker-compose.yaml"
   local new_compose_file=false
   local unused_compose_args=()
   local get_next=false
@@ -174,7 +174,7 @@ Always-on Docker Options:
     local IPC="host"
     local ULIMIT_MEMLOCK=-1
     local ULIMIT_STACK=67108864
-    local ENTRYPOINT="${HOME}/.config/${USER}/containers/entrypoint.sh"
+    local ENTRYPOINT="${HOME}/.config/docker/entrypoint.sh"
     local USER_MOUNTS=()
     local USER_ARGS=()
     while [[ $# -gt 1 ]]; do
