@@ -18,7 +18,7 @@ apt-get install -y sudo \
                    npm \
                    clangd \
                    ccls \
-                   bear
+                   bear;
 EOT
 
 # clone GDRcopy for IDE symbol search
@@ -35,7 +35,7 @@ for dep in ${pythondeps[@]}; do
     else
         pip3 install --upgrade $dep;
     fi;
-done
+done;
 EOT
 
 # create container user that mirrors the host user
@@ -44,7 +44,7 @@ ENV HOST_UID=100341
 ENV HOST_GROUP=dip
 ENV HOST_GID=30
 RUN useradd -o -m -N -u $HOST_UID -g $HOST_GID -s /bin/bash $HOST_USER
-RUN usermod -aG $HOST_GROUP $HOST_USER;
+RUN usermod -aG $HOST_GROUP $HOST_USER
 RUN usermod -aG sudo $HOST_USER
 RUN usermod -aG root $HOST_USER
 

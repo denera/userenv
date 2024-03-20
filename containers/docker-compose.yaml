@@ -11,7 +11,7 @@ x-defaults: &defaults
       target: /ssh-agent
     - type: bind
       source: ${DEVROOT}
-      target: /devroot
+      target: ${DEVROOT}
     - type: bind
       source: ${HOME}/.bashrc
       target: ${HOME}/.bashrc

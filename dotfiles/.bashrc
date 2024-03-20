@@ -9,7 +9,7 @@ fi
 
 # launch or re-attach to the SSH agent
 if [[ ! -f "/.dockerenv" ]]; then
-    export DEVROOT=${HOME}/devroot
+    export DEVROOT=$(readlink -f "${HOME}/devroot")
     # this is NOT a container so we launch the SSH agent if it's not already running
     ssh-add -l &>/dev/null
     if [[ "$?" == 2 ]]; then
