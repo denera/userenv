@@ -45,7 +45,7 @@ remove() {
 getnode() {
   local partition="L40x4"
   local duration="8:00:00"
-  while [[ $# -gt 0  ]]; do
+  while [[ $# -gt 0 ]]; do
     case $1 in
       -t|--time)
         shift
@@ -105,7 +105,7 @@ Always-on Docker Options:
   # parse docker compose arguments
   local DETACH=""
   local CONTAINER="${*: -1}"
-  local COMPOSE_FILE="${HOME}/.config/docker/docker-compose.yaml"
+  local COMPOSE_FILE="${HOME}/.config/containers/docker-compose.yaml"
   local new_compose_file=false
   local unused_compose_args=()
   local get_next=false
@@ -152,12 +152,12 @@ Always-on Docker Options:
     fi
     # update UID/GID in the docker compose services
     sed -i "s/user:.*/user: $(id -u):$(id -g)/" $COMPOSE_FILE
-    # build the composed container
-    local build_cmd="docker compose -f ${COMPOSE_FILE} build --no-cache ${CONTAINER}"
-    printf "runcontainer: BUILDING: ${build_cmd}"
-    $build_cmd
+    # # build the composed container
+    # local build_cmd="docker compose -f ${COMPOSE_FILE} build --no-cache ${CONTAINER}"
+    # printf "runcontainer: BUILDING: ${build_cmd}"
+    # $build_cmd
     # launch the composed container
-    local start_cmd="docker compose -f ${COMPOSE_FILE} up ${DETACH}${CONTAINER}"
+    local start_cmd="docker compose -f ${COMPOSE_FILE} up --build ${DETACH}${CONTAINER}"
     printf "runcontainer: STARTING: ${start_cmd}\n"
     $start_cmd
   else
@@ -174,7 +174,7 @@ Always-on Docker Options:
     local IPC="host"
     local ULIMIT_MEMLOCK=-1
     local ULIMIT_STACK=67108864
-    local ENTRYPOINT="${HOME}/.config/docker/entrypoint.sh"
+    local ENTRYPOINT="${HOME}/.config/containers/entrypoint.sh"
     local USER_MOUNTS=()
     local USER_ARGS=()
     while [[ $# -gt 1 ]]; do

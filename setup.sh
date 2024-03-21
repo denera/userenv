@@ -17,13 +17,17 @@ EOT
 
 # helper functions
 env_backup() {
-    if [ -L $1 ]; then
-        echo "    Removing sym-link: ~/$1 -> $(readlink -f "${HOME}/$1")";
-        rm "${HOME}/$1";
-    else
-        echo "    Creating backup: ~/$1 -> ~/env_backup/$1";
-        mkdir -p "${HOME}/env_backup";
-        mv "${HOME}/$1" "${HOME}/env_backup/$1";
+    if [ -e "$1" ]; then
+        if [ -L "$1" ]; then
+            echo "    Removing sym-link: $1 --> $(readlink -f "$1")";
+            rm "$1";
+        else
+            item=$(echo "$1" | rev | cut -d'/' -f1 | rev)
+            echo "    Creating backup: $1 --> ${HOME}/env_backup/${item}";
+            mkdir -p "${HOME}/env_backup";
+            [ -e "${HOME}/env_backup/${item}" ] && rm -r "${HOME}/env_backup/${item}";
+            mv "$1" "${HOME}/env_backup/${item}";
+        fi
     fi;
 }
 
@@ -79,7 +83,7 @@ done;
 if [[ "${DEVROOT}" != "${HOME}/devroot" ]]; then
     echo "Preparing ~/devroot ...";
     [ ${OVERWRITE} == true ] && [ -e "${HOME}/devroot" ] && env_backup "devroot";
-    [ ! -e "${HOME}/devroot" ] && eval "$CMD ${DEVROOT} ${HOME}/devroot";
+    [ ! -e "${HOME}/devroot" ] && eval "ln -s ${DEVROOT} ${HOME}/devroot";
 fi;
 
 # clone user environment config
@@ -91,33 +95,39 @@ elif [[ $(git_origin "${STAGE}") != "git@github.com:denera/userenv.git" ]]; then
     exit 1;
 fi;
 
-# link dotfiles
+# prep dotfiles
 echo 'Preparing ~/.dotfiles ...'
 shopt -s dotglob
 for item in "${STAGE}/dotfiles/"*; do
     dotfile=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/${dotfile}" ] && env_backup "${dotfile}";
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/${dotfile}" ] && env_backup "${HOME}/${dotfile}";
     [ ! -e "${HOME}/${dotfile}" ] && eval "${CMD} ${STAGE}/dotfiles/${dotfile} ${HOME}/${dotfile}";
+    [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/${dotfile}";
 done;
 
-# link configs
+# prep configs
 echo 'Preparing ~/.config ...'
 mkdir -p "${HOME}/.config";
 shopt -s dotglob
 for item in "${STAGE}/configs/"*; do
     config=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/${config}" ] && env_backup "${config}";
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/${config}" ] && env_backup "${HOME}/.config/${config}";
     [ ! -e "${HOME}/.config/${config}" ] && eval "${CMD} ${STAGE}/configs/${config} ${HOME}/.config/${config}";
+    [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.config/${config}";
 done;
+[ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/containers" ] && env_backup "${HOME}/.config/containers";
+[ ! -e "${HOME}/.config/containers" ] && eval "${CMD} ${STAGE}/containers ${HOME}/.config/containers";
+[[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.config/containers";
 
-# link binaries
+# prep binaries
 echo 'Preparing ~/.local/bin ...'
 mkdir -p "${HOME}/.local/bin";
 shopt -s dotglob
 for item in "${STAGE}/bins/"*; do
     bin=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.local/bin/${bin}" ] && env_backup "${bin}";
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.local/bin/${bin}" ] && env_backup "${HOME}/.local/bin/${bin}";
     [ ! -e "${HOME}/.local/bin/${bin}" ] && eval "${CMD} ${STAGE}/bins/${bin} ${HOME}/.local/bin/${bin}";
+    [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.local/bin/${bin}";
 done
 
 echo "DONE -- reload your bash environment with 'exec /bin/bash'"

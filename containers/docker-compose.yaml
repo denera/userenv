@@ -3,36 +3,10 @@ name: adener
 
 x-defaults: &defaults
   volumes:
-    - type: bind
-      source: /raid
-      target: /raid
-    - type: bind
-      source: ${SSH_AUTH_SOCK}
-      target: /ssh-agent
-    - type: bind
-      source: ${DEVROOT}
-      target: ${DEVROOT}
-    - type: bind
-      source: ${HOME}/.bashrc
-      target: ${HOME}/.bashrc
-    - type: bind
-      source: ${HOME}/.inputrc
-      target: ${HOME}/.inputrc
-    - type: bind
-      source: ${HOME}/.gitconfig
-      target: ${HOME}/.gitconfig
-    - type: bind
-      source: ${HOME}/.shellcheckrc
-      target: ${HOME}/.shellcheckrc
-    - type: bind
-      source: ${HOME}/.config
-      target: ${HOME}/.config
-    - type: bind
-      source: ${HOME}/.vscode-server
-      target: ${HOME}/.vscode-server
-    - type: bind
-      source: ${HOME}/.local/bin/starship
-      target: /usr/bin/starship
+    - /raid:/raid
+    - ${SSH_AUTH_SOCK}:/ssh-agent
+    - ${DEVROOT}:${DEVROOT}
+    - ${HOME}:${HOME}
   environment:
     - SSH_AUTH_SOCK=/ssh-agent
   user: 100341:30
