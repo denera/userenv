@@ -38,6 +38,10 @@ else
 fi
 ssh-add -l
 
+# make sure CUDA bin is in path
+export CUDA_HOME=/usr/local/cuda
+prepend PATH ${CUDA_HOME}/bin
+
 # starship prompt
 prepend PATH ${HOME}/.local/bin
 eval "$(starship init bash)"

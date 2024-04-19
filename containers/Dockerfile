@@ -6,19 +6,13 @@ SHELL ["/bin/bash", "-c"]
 USER root
 
 # install apt packages
+RUN apt-get clean
 RUN apt-get update
 RUN <<EOT
 apt-get install -y sudo \
                    gosu \
                    mpich \
-                   tmux \
-                   universal-ctags \
-                   ack \
-                   nodejs \
-                   npm \
-                   clangd \
-                   ccls \
-                   bear;
+                   ack
 EOT
 
 # clone GDRcopy for IDE symbol search

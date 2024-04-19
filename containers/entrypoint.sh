@@ -1,17 +1,7 @@
 #!/bin/bash
 
 # get sudo and gosu to make root actions easier for the new user we will create below
-apt-get update && apt-get install sudo \
-                                  gosu \
-                                  mpich \
-                                  tmux \
-                                  universal-ctags \
-                                  ack \
-                                  nodejs \
-                                  npm \
-                                  clangd \
-                                  ccls \
-                                  bear;
+apt-get clean && apt-get update && apt-get install -y sudo gosu mpich
 
 # install some essential python dependencies
 pip3 install --upgrade pip wheel setuptools flake8 pytest pybind11;
@@ -47,7 +37,7 @@ visudo -cf /etc/sudoers.d/99_sudo_include_file;
 
 # execute remaining container commands as the new user
 if [[ $# -eq 0 ]]; then
-  exec sudo /usr/sbin/gosu $HOST_USER "/bin/bash";
+  exec /usr/sbin/gosu $HOST_USER "/bin/bash";
 else
-  exec sudo /usr/sbin/gosu $HOST_USER "$@";
+  exec /usr/sbin/gosu $HOST_USER "$@";
 fi;

@@ -17,6 +17,7 @@ x-defaults: &defaults
   tty: true
   command: /bin/bash
   privileged: true
+  shm_size: 1000000000  # 1g
   ulimits: &ulimits
     memlock: -1
     stack: 67108864
@@ -36,11 +37,11 @@ services:
     build:
       context: .
       cache_from:
-        - ghcr.io/nvidia/pax:latest
+        - ghcr.io/nvidia/jax:pax
       args:
-        base: ghcr.io/nvidia/pax:latest
+        base: ghcr.io/nvidia/jax:pax
         pydeps: git+https://github.com/deepmind/einshape
-    working_dir: /workspace/te-jax-dev
+    working_dir: ${DEVROOT}/code/te-jax-dev
 
   te-torch-dev:
     <<: *defaults
@@ -52,7 +53,7 @@ services:
       args:
         base: gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
         pydeps:
-    working_dir: /workspace/te-torch-dev
+    working_dir: ${DEVROOT}/code/te-torch-dev
 
   te-all-dev:
     <<: *defaults
@@ -64,4 +65,4 @@ services:
       args:
         base: gitlab-master.nvidia.com/dl/dgx/pytorch:master-py3-devel
         pydeps: jax[cuda12_local],git+https://github.com/google/flax,git+https://github.com/google/praxis,git+https://github.com/deepmind/einshape
-    working_dir: /workspace
+    working_dir: ${DEVROOT}/code

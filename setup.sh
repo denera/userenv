@@ -117,7 +117,7 @@ for item in "${STAGE}/configs/"*; do
 done;
 [ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/containers" ] && env_backup "${HOME}/.config/containers";
 [ ! -e "${HOME}/.config/containers" ] && eval "${CMD} ${STAGE}/containers ${HOME}/.config/containers";
-[[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.config/containers";
+[[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.config/containers" && chmod +x "${HOME}/.config/containers/entrypoint.sh";
 
 # prep binaries
 echo 'Preparing ~/.local/bin ...'
