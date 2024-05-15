@@ -41,6 +41,7 @@ ssh-add -l
 # make sure CUDA bin is in path
 export CUDA_HOME=/usr/local/cuda
 prepend PATH ${CUDA_HOME}/bin
+append LD_LIBRARY_PATH ${CUDA_HOME}/lib64
 
 # starship prompt
 prepend PATH ${HOME}/.local/bin

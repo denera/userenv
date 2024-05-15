@@ -6,14 +6,8 @@ SHELL ["/bin/bash", "-c"]
 USER root
 
 # install apt packages
-RUN apt-get clean
-RUN apt-get update
-RUN <<EOT
-apt-get install -y sudo \
-                   gosu \
-                   mpich \
-                   ack
-EOT
+RUN apt-get update --allow-insecure-repositories --allow-unauthenticated
+RUN apt-get install -y sudo gosu
 
 # clone GDRcopy for IDE symbol search
 RUN git clone https://github.com/NVIDIA/gdrcopy.git /opt/gdrcopy

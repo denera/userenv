@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # get sudo and gosu to make root actions easier for the new user we will create below
-apt-get clean && apt-get update && apt-get install -y sudo gosu mpich
+apt-get update --allow-insecure-repositories --allow-unauthenticated && apt-get install -y sudo gosu
 
 # install some essential python dependencies
 pip3 install --upgrade pip wheel setuptools flake8 pytest pybind11;
@@ -41,3 +41,4 @@ if [[ $# -eq 0 ]]; then
 else
   exec /usr/sbin/gosu $HOST_USER "$@";
 fi;
+
