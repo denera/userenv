@@ -7,10 +7,7 @@ USER root
 
 # install apt packages
 RUN apt-get update --allow-insecure-repositories --allow-unauthenticated
-RUN apt-get install -y sudo gosu
-
-# clone GDRcopy for IDE symbol search
-RUN git clone https://github.com/NVIDIA/gdrcopy.git /opt/gdrcopy
+RUN apt-get install -y sudo gosu pax-utils vim clangd-12 nodejs
 
 # install Python dependencies
 ARG pydeps

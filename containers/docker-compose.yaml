@@ -5,8 +5,8 @@ x-defaults: &defaults
   volumes:
     - /raid:/raid
     - ${SSH_AUTH_SOCK}:/ssh-agent
-    - ${DEVROOT}:${DEVROOT}
     - ${HOME}:${HOME}
+    - ${DEVROOT}:/devroot
   environment:
     - SSH_AUTH_SOCK=/ssh-agent
   user: 100341:30

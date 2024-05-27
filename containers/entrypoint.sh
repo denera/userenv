@@ -1,13 +1,10 @@
 #!/bin/bash
 
 # get sudo and gosu to make root actions easier for the new user we will create below
-apt-get update --allow-insecure-repositories --allow-unauthenticated && apt-get install -y sudo gosu
+apt-get update --allow-insecure-repositories --allow-unauthenticated && apt-get install -y sudo gosu pax-utils clangd-12
 
 # install some essential python dependencies
 pip3 install --upgrade pip wheel setuptools flake8 pytest pybind11;
-
-# clone GDRcopy for IDE symbol search
-git clone https://github.com/NVIDIA/gdrcopy.git /opt/gdrcopy
 
 # guard against the possibility that $GID may be unset in the host environment
 HOST_USER=adener;

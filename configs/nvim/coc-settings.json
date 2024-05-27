@@ -1,0 +1,14 @@
+{
+    "clangd.enabled": true,
+    "clangd.semanticHighlighting": true,
+
+    "pyright.enable": true,
+    "pyright.server": "pyright-langserver",
+    "pyright.testing.provider": "pytest",
+    "python.analysis.autoSearchPaths": true,
+    "python.linting.pylintEnabled": true,
+
+    "coc.preferences.extensionUpdateCheck": "daily",
+    "codeLens.enable": true,
+    "diagnostic.virtualText": true
+}

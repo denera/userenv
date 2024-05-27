@@ -12,6 +12,7 @@ Options:
     -c, --copy            Copy the environment files to ${HOME} instead of using symbolic links.
     -o, --overwrite       Overwrite existing environment. >> WARNING: DESTRUCTIVE <<
     -d, --devroot         Path to the primary dev workspace.
+        --neovim          Install neovim.
 
 EOT
 
@@ -38,8 +39,9 @@ git_origin() {
 # parse options
 STAGE="${HOME}/.config/${USER}";
 DEVROOT="${HOME}/devroot";
-CMD='ln -s'
-OVERWRITE=false
+CMD='ln -s';
+OVERWRITE=false;
+GET_NEOVIM=false;
 while [[ $# -gt 0 ]]; do
     case $1 in
         -h|--help)
@@ -70,6 +72,10 @@ while [[ $# -gt 0 ]]; do
             fi;
             shift;
             ;;
+        --neovim)
+            GET_NEOVIM=true;
+            shift;
+            ;;
         *)
             echo "ERROR: Unrecognized argument: $1";
             echo "${USAGE}";
@@ -77,14 +83,7 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac;
 done;
-
-# symlink devroot
 [ ! -d "${DEVROOT}" ] && echo "ERROR: Invalid devroot path: ${DEVROOT}" && exit 1;
-if [[ "${DEVROOT}" != "${HOME}/devroot" ]]; then
-    echo "Preparing ~/devroot ...";
-    [ ${OVERWRITE} == true ] && [ -e "${HOME}/devroot" ] && env_backup "devroot";
-    [ ! -e "${HOME}/devroot" ] && eval "ln -s ${DEVROOT} ${HOME}/devroot";
-fi;
 
 # clone user environment config
 echo "Staging github.com/denera/userenv in ${STAGE} ...";
@@ -100,9 +99,14 @@ echo 'Preparing ~/.dotfiles ...'
 shopt -s dotglob
 for item in "${STAGE}/dotfiles/"*; do
     dotfile=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
+    [ ${dotfile} == ".vimrc" ] && continue;  # skip copying .vimrc
     [ ${OVERWRITE} == true ] && [ -e "${HOME}/${dotfile}" ] && env_backup "${HOME}/${dotfile}";
     [ ! -e "${HOME}/${dotfile}" ] && eval "${CMD} ${STAGE}/dotfiles/${dotfile} ${HOME}/${dotfile}";
     [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/${dotfile}";
+    if [[ ${dotfile} ==  ".bashrc"  ]]; then
+        echo "Setting DEVROOT=${DEVROOT} ...";
+        sed -i -e "s@export DEVROOT=.*@export DEVROOT=${DEVROOT}@" ${HOME}/${dotfile};
+    fi;
 done;
 
 # prep configs
@@ -111,6 +115,7 @@ mkdir -p "${HOME}/.config";
 shopt -s dotglob
 for item in "${STAGE}/configs/"*; do
     config=$(echo "${item}" | rev | cut -d'/' -f1 | rev);
+    [[ ${config} == "nvim" ]] && continue;
     [ ${OVERWRITE} == true ] && [ -e "${HOME}/.config/${config}" ] && env_backup "${HOME}/.config/${config}";
     [ ! -e "${HOME}/.config/${config}" ] && eval "${CMD} ${STAGE}/configs/${config} ${HOME}/.config/${config}";
     [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.config/${config}";
@@ -129,6 +134,56 @@ for item in "${STAGE}/bins/"*; do
     [ ! -e "${HOME}/.local/bin/${bin}" ] && eval "${CMD} ${STAGE}/bins/${bin} ${HOME}/.local/bin/${bin}";
     [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/.local/bin/${bin}";
 done
+
+# install vim plugins
+if [ ${GET_NEOVIM} == true ]; then
+    echo 'Preparing neovim ...';
+    if [ ! -x $(command -v node) ]; then
+        echo '    Installing Node.js ...';
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash;
+        export NVM_DIR="$HOME/.nvm";
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh";
+        [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion";
+        nvm install 17 && nvm use 17;
+    fi;
+    if [ ! -x $(command -v nvim) ]; then
+        echo '    Installing pre-built neovim binaries ...';
+        mkdir -p "${HOME}/.local/src";
+        curl -o "${HOME}/.local/src/nvim-linux64.tar.gz" -L https://github.com/neovim/neovim-releases/releases/download/v0.10.0/nvim-linux64.tar.gz;
+        tar -C ${HOME}/.local/src -xzf ${HOME}/.local/src/nvim-linux64.tar.gz;
+        rm ${HOME}/.local/src/nvim-linux64.tar.gz;
+        for item in "${HOME}/.local/src/nvim-linux64/"*; do
+            folder=$(echo ${item} | rev | cut -d'/' -f1 | rev);
+            [ ! -d "${HOME}/.local/${folder}" ] && mkdir -p ${HOME}/.local/${folder};
+            mv -f ${HOME}/.local/src/nvim-linux64/${folder}/* ${HOME}/.local/${folder}/;
+        done;
+        rm -r ${HOME}/.local/src/nvim-linux64;
+    fi;
+    NVIM_PLUG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim;
+    if [ ! -d "${NVIM_PLUG_PATH}" ]; then
+        echo "    Installing nvim-plug ...";
+        curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim;
+    fi;
+    NVIM_CONFIG_HOME="${XDF_CONFIG_HOME:-$HOME/.config}"/nvim;
+    [ ${OVERWRITE} == true ] && [ -e "${NVIM_CONFIG_HOME}" ] && env_backup "${NVIM_CONFIG_HOME}";
+    [ ! -e "${NVIM_CONFIG_HOME}" ] && eval "${CMD} ${STAGE}/configs/nvim ${NVIM_CONFIG_HOME}";
+    [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${NVIM_CONFIG_HOME}";
+    echo "    Installing plugins ...";
+    nvim --headless -c 'silent' -c 'PlugInstall' -c 'qall';
+elif [ -x $(command -v vim) ]; then
+    echo 'Preparing vim ...';
+    [ ${OVERWRITE} == true ] && [ -e "${HOME}/.vimrc" ] && env_backup "${HOME}/.vimrc";
+    [ ! -e "${HOME}/.vimrc" ] && eval "${CMD} ${STAGE}/dotfiles/.vimrc ${HOME}/.vimrc";
+    [[ "${CMD}" == "cp"* ]] && chmod 755 "${HOME}/.vimrc";
+    # Install vim-plug
+    if [ ! -e "${HOME}/.vim/autoload/plug.vim" ]; then
+        echo '    Installing vim-plug ...';
+        VIM_PLUG_URL="https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim";
+        curl -fLo ${HOME}/.vim/autoload/plug.vim --create-dirs ${VIM_PLUG_URL};
+    fi;
+    echo "    Installing plugins ...";
+    vim +slient +VimEnter +PlugInstall +qall;
+fi;
 
 echo "DONE -- reload your bash environment with 'exec /bin/bash'"
 
