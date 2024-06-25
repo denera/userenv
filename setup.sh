@@ -103,9 +103,16 @@ for item in "${STAGE}/dotfiles/"*; do
     [ ${OVERWRITE} == true ] && [ -e "${HOME}/${dotfile}" ] && env_backup "${HOME}/${dotfile}";
     [ ! -e "${HOME}/${dotfile}" ] && eval "${CMD} ${STAGE}/dotfiles/${dotfile} ${HOME}/${dotfile}";
     [[ "${CMD}" == "cp"* ]] && chmod 755 -R "${HOME}/${dotfile}";
-    if [[ ${dotfile} ==  ".bashrc"  ]]; then
+    if [[ ${dotfile} ==  ".bashrc" ]]; then
         echo "Setting DEVROOT=${DEVROOT} ...";
         sed -i -e "s@export DEVROOT=.*@export DEVROOT=${DEVROOT}@" ${HOME}/${dotfile};
+    elif [[ ${dotfile} == ".bash_utils" ]]; then
+        echo "Adding system-specific utils to ~/.bash_utils ..."
+        SYSNAME="dlcluster";
+        if [[ $(hostname) == *"eos"* ]]; then
+            SYSNAME="eos";
+        fi;
+        cat "${STAGE}/dotfiles]/.env_${SYSNAME}" >> "${HOME}/.bash_utils";
     fi;
 done;
 
