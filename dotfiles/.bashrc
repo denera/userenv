@@ -9,7 +9,6 @@ fi
 
 # launch or re-attach to the SSH agent
 if [[ ! -f "/.dockerenv" ]]; then
-    export DEVROOT="/mnt/nvdl/usr/adener"
     # this is NOT a container so we launch the SSH agent if it's not already running
     ssh-add -l &>/dev/null
     if [[ "$?" == 2 ]]; then
@@ -34,10 +33,11 @@ if [[ ! -f "/.dockerenv" ]]; then
         fi
     fi
 else
-    export DEVROOT="/devroot"
     export SSH_AUTH_SOCK="/ssh-agent"
 fi
 ssh-add -l
+
+export DEVROOT="/mnt/nvdl/usr/adener"
 
 # make sure CUDA bin is in path
 export CUDA_HOME="/usr/local/cuda"

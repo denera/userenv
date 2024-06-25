@@ -37,9 +37,9 @@ services:
     build:
       context: .
       cache_from:
-        - ghcr.io/nvidia/jax:pax
+        - ghcr.io/nvidia/jax:jax
       args:
-        base: ghcr.io/nvidia/jax:pax
+        base: ghcr.io/nvidia/jax:jax
         pydeps: git+https://github.com/deepmind/einshape
     working_dir: ${DEVROOT}/code/te-jax-dev
 

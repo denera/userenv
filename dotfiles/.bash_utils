@@ -58,6 +58,9 @@ getnode() {
         ;;
     esac
   done;
+  if [[ ${partition} == "viking" ]]; then
+    partition="viking-prod -A viking";
+  fi;
   srun -t ${duration} -p ${partition} --pty bash;
 }
 

@@ -1,0 +1,162 @@
+#!/bin/bash
+
+__descr="
+nvte-clean: Utility for cleaning build and installation files
+            for the Transformer Engine library.
+";
+
+__usage="
+Usage:
+    nvte-clean [-h|--help] <TARGETS> [/optional/path/to/TransformerEngine]
+
+TARGETS:
+    build       Build files in the source repo.
+    cache       __pycache__ and .pytest_cache folders in the source repo.
+    home        Local user installation (from 'pip install --user').
+    system      Global system installation.
+    installs    Both local and global installations.
+    all         All of the above.
+";
+
+# Defaults
+TE_PATH=$PWD
+CLEAN_BUILD=false;
+CLEAN_CACHE=false;
+CLEAN_HOME=false;
+CLEAN_SYS=false;
+
+# Parse arguments
+GOT_PATH=false;
+GOT_TARGET=false;
+while [ $# -gt 0 ]; do
+    case $1 in
+        -h|--help)
+            printf "$__descr";
+            printf "$__usage";
+            exit 0;
+            ;;
+        build)
+            GOT_TARGET=true;
+            CLEAN_BUILD=true;
+            shift;
+            ;;
+        cache)
+            GOT_TARGET=true;
+            CLEAN_CACHE=true;
+            shift;
+            ;;
+        home)
+            GOT_TARGET=true;
+            CLEAN_HOME=true;
+            shift;
+            ;;
+        system)
+            GOT_TARGET=true;
+            CLEAN_SYS=true;
+            shift;
+            ;;
+        installs)
+            GOT_TARGET=true;
+            CLEAN_HOME=true;
+            CLEAN_SYS=true;
+            shift;
+            ;;
+        all)
+            GOT_TARGET=true;
+            CLEAN_BUILD=true;
+            CLEAN_CACHE=true;
+            CLEAN_HOME=true;
+            CLEAN_SYS=true;
+            shift;
+            ;;
+        *)
+            if [ $GOT_PATH == true ]; then
+                echo "[nvte-clean] ERROR: Unrecognized option: $1";
+                printf "$__usage";
+                exit 1;
+            fi;
+
+            if [ ! -d $1 ]; then
+                echo "[nvte-clean] ERROR: Invalid path: $1";
+                printf "$__usage";
+                exit 1;
+            fi;
+
+            GOT_PATH=true;
+            TE_PATH=$1;
+            shift;
+            ;;
+    esac;
+done;
+
+if [ ! -d "$TE_PATH/transformer_engine" ]; then
+    echo "[nvte-clean] ERROR: Not a Transformer Engine repo: $TE_PATH";
+    printf "$__usage";
+    exit 1;
+fi;
+
+if ! $GOT_TARGET; then
+    echo "[nvte-clean] ERROR: Must specify a target to clean!";
+    printf "$__usage":
+    exit 1;
+fi;
+
+# Clean build files in the repo
+if $CLEAN_BUILD; then
+    echo -n "[nvte-clean] Removing build files and libraries... ";
+
+    rm -rf \
+$TE_PATH/build \
+$TE_PATH/build_tools/build \
+$TE_PATH/*.egg-info \
+$TE_PATH/*.so \
+$TE_PATH/transformer_engine/*.so \
+> /dev/null 2>&1;
+
+    echo "DONE";
+fi;
+
+# Clean __pycache__ and .pytest_cache
+if $CLEAN_CACHE; then
+    echo -n "[nvte-clean] Removing Python and PyTest caches... ";
+
+    rm -rf $TE_PATH/.pytest_cache > /dev/null 2>&1;
+    rm -rf $(find $TE_PATH/ -name __pycache__ -type d -prune) > /dev/null 2>&1;
+
+    echo "DONE";
+fi;
+
+# Clean local user installation
+if $CLEAN_HOME; then
+    echo -n "[nvte-clean] Removing the local user installation... ";
+
+    PYTHON_USER_SITE=$(python3 -m site --user-site);
+
+    rm -rf \
+$PYTHON_USER_SITE/*transformer*engine* \
+$PYTHON_USER_SITE/easy-install.pth \
+> /dev/null 2>&1;
+
+    echo "DONE";
+fi;
+
+# Clean global system installation
+if $CLEAN_SYS; then
+    echo -n "[nvte-clean] Removing the global system installation... ";
+
+    PYTHON_SYS_SITE=$(python3 -c "import site; print(site.getsitepackages()[0])")
+
+    SYS_RM_CMD='rm -rf';
+    if command -v sudo &> /dev/null; then
+        SYS_RM_CMD='sudo rm -rf';
+    fi;
+
+    ${SYS_RM_CMD} \
+$PYTHON_SYS_SITE/*transformer*engine* \
+$PYTHON_SYS_SITE/easy-install.pth \
+> /dev/null 2>&1;
+
+    echo "DONE";
+fi;
+
+exit 0;
